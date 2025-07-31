@@ -1,0 +1,278 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+  </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pavan sai Gude</title>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.21.4/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+    .fade-in { animation: fadeIn 1s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .card-hover { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .card-hover:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); }
+  </style>
+</head>
+<body class="bg-gray-900 text-white">
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useEffect } = React;
+
+    // Header Component
+    const Header = () => {
+      const navItems = ['Home', 'About', 'Skills', 'Projects', 'Experience', 'Contact'];
+      return (
+        <nav className="bg-gray-800 sticky top-0 z-50 shadow-lg">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between h-16">
+              <div className="flex items-center">
+                <h1 className="text-xl font-bold">Pavan Sai Gude</h1>
+              </div>
+              <div className="flex items-center space-x-4">
+                {navItems.map((item) => (
+                  <a
+                    key={item}
+                    href={`#${item.toLowerCase()}`}
+                    className="hover:text-blue-400 transition-colors"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById(item.toLowerCase())?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                  >
+                    {item}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        </nav>
+      );
+    };
+
+    // Hero Component
+    const Hero = () => (
+      <section id="home" className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-600 to-purple-600">
+        <div className="text-center fade-in">
+          <h1 className="text-5xl font-bold mb-4">Hi, I'm Pavan Sai Gude</h1>
+          <p className="text-xl mb-6">Ex-Intern @ MH Cognition | Learning and Improving With AI</p>
+          <a
+            href="#projects"
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-full transition-colors"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
+            View My Work
+          </a>
+        </div>
+      </section>
+    );
+
+    // About Component
+    const About = () => (
+      <section id="about" className="py-20 bg-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 fade-in">
+          <h2 className="text-3xl font-bold mb-6 text-center">About Me</h2>
+          <p className="text-lg max-w-2xl mx-auto">
+Passionate React Native Developer skilled in building cross-platform mobile and web applications using React, React Native, Django, and Flask. I completed a React Native internship at MH Cognition, contributing to real-world mobile apps, and built full-stack projects like a sentiment prediction system using Python and AWS. I specialize in creating scalable apps with clean UI/UX, reusable components, and REST API integration. Currently pursuing a B.Tech in AI & ML, I’m proficient in Python, JavaScript, TypeScript, Redux, MySQL, and AWS EC2. Based in Hyderabad, I’m eager to join agile teams and build impactful solutions. Let’s connect!</p>
+        </div>
+      </section>
+    );
+
+    // Skills Component
+    const Skills = () => {
+      const skills = ['React.js', 'JavaScript', 'TypeScript', 'Node.js', 'Tailwind CSS', 'HTML', 'CSS', 'Git'];
+      return (
+        <section id="skills" className="py-20 bg-gray-900">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-bold mb-6 text-center">Skills</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {skills.map((skill) => (
+                <div key={skill} className="bg-gray-700 p-4 rounded-lg text-center card-hover">
+                  <span className="text-lg font-semibold">{skill}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+    // Projects Component
+    const Projects = () => {
+      const projects = [
+        {
+          title: 'Blog Post Web and App',
+          description: 'Developed a full-stack blog web and mobile application using React/Vite (front-end) , React-Native and Django (backend) with REST APIs, enabling efficient data handling and seamless front-end/back-end integration.',
+          tech: ['React.js', 'Django', 'REST APIs'],
+        },
+        {
+          title: 'Development and AWS Inference of Sentiment Prediction Model',
+          description: 'Deployed a trained sentiment classification model integrated with a Flask web application, enabling real-time inference and user interaction.',
+          tech: ['React.js', 'HTML', 'Tailwind CSS'],
+          link: 'https://github.com/Pavansai0910/regex_deployment_aws_2',
+        },
+      ];
+      return (
+        <section id="projects" className="py-20 bg-gray-800">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-bold mb-6 text-center">Projects</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {projects.map((project) => (
+                <div key={project.title} className="bg-gray-700 p-6 rounded-lg card-hover">
+                  <h3 className="text-xl font-semibold mb-2">{project.title}</h3>
+                  <p className="text-gray-300 mb-4">{project.description}</p>
+                  <p className="text-sm text-gray-400 mb-4">Tech: {project.tech.join(', ')}</p>
+                  <a href={project.link} className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-full">
+                    View Project
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+    // Experience Component
+    const Experience = () => {
+      const experiences = [
+        {
+          title: 'SDE Intern',
+          company: 'MH Cognition',
+          duration: 'Feb 2025 - May 2025',
+          responsibilities: [
+            'Developed and maintained cross-platform mobile applications using React Native and Flutter for iOS and Android,increasing user engagement by 30% through feature enhancements and performance optimization.',
+            'Optimized front-end performance, reducing load times by 30%.Created comprehensive development documentation, streamlining onboarding for new developers and enhancing code maintainability.',
+            'Collaborated with cross-functional teams (UI/UX designers, backend developers) to deliver high-quality app features,ensuring seamless integration and improved user experience',
+          ],
+        },
+        {
+          title: 'Data Science Intern',
+          company: 'Innomatics Research Labs',
+          duration: 'Feb 2024 - April 2024',
+          responsibilities: [
+            'Gained knowledge of Machine Learning, Flask, Deep Learning fundamentals, and SQL for effective coding.',
+            'Collaborated on a team-based Machine Learning project, applying data-driven solutions.',
+            'Supported cybersecurity measures during project deployment, including secure configuration of cloud-based systems.',
+          ],
+        },
+      ];
+      return (
+        <section id="experience" className="py-20 bg-gray-900">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-bold mb-6 text-center">Experience</h2>
+            <div className="space-y-8">
+              {experiences.map((exp) => (
+                <div key={exp.title} className="bg-gray-700 p-6 rounded-lg card-hover">
+                  <h3 className="text-xl font-semibold">{exp.title}</h3>
+                  <p className="text-gray-300">{exp.company} | {exp.duration}</p>
+                  <ul className="list-disc list-inside text-gray-300 mt-4">
+                    {exp.responsibilities.map((resp) => (
+                      <li key={resp}>{resp}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+    // Contact Component
+    const Contact = () => (
+      <section id="contact" className="py-20 bg-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold mb-6 text-center">Get in Touch</h2>
+          <div className="max-w-lg mx-auto">
+            <div className="flex justify-center space-x-4 mt-6">
+              <a href="https://github.com/Pavansai0910" className="text-gray-300 hover:text-blue-400">GitHub</a>
+              <a href="https://www.linkedin.com/in/pavansai-gude/" className="text-gray-300 hover:text-blue-400">LinkedIn</a>
+            </div>
+            <p className="text-center mt-4 text-gray-300">Email: pavansaipavansai31@example.com</p>
+          </div>
+        </div>
+      </section>
+    );
+
+    // Footer Component
+    const Footer = () => (
+      <footer className="bg-gray-900 py-6 text-center">
+        <p className="text-gray-400">© 2025 Pavan Sai Gude. All rights reserved.</p>
+        <a
+          href="#home"
+          className="text-blue-400 hover:text-blue-500"
+          onClick={(e) => {
+            e.preventDefault();
+            document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' });
+          }}
+        >
+          Back to Top
+        </a>
+      </footer>
+    );
+
+    // Main App Component
+    const App = () => (
+      <div>
+        <Header />
+        <Hero />
+        <About />
+        <Skills />
+        <Projects />
+        <Experience />
+        <Contact />
+        <Footer />
+      </div>
+    );
+
+    // Render the App
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
