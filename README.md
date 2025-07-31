@@ -1,0 +1,1 @@
+This file is a simple HTML document that incorporates both HTML structure and JavaScript functionality. The code for this file was automatically generated using Grok, which provides the initial boilerplate for basic portfolio.
